@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0fdf4;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            color: #334155;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+        }
+        h2 { text-align: center; color: #2563eb; margin-bottom: 5px; }
+        
+        .time-text { text-align: center; color: #4ade80; font-size: 0.85rem; margin-bottom: 5px; }
+        .rate-display { text-align: center; color: #64748b; font-size: 0.95rem; margin-bottom: 20px; font-weight: 500; background: #f1f5f9; padding: 8px; border-radius: 8px;}
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input, select, button {
+            padding: 12px;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+        }
+        input { flex: 1; transition: 0.3s; }
+        input:focus:not([readonly]) { border-color: #4ade80; box-shadow: 0 0 0 3px #dcfce7; }
+        
+        input[readonly] {
+            background-color: #e2e8f0;
+            color: #475569;
+            cursor: not-allowed;
+        }
+        input[readonly]:focus {
+            border-color: #bbf7d0;
+            box-shadow: none;
+        }
+
+        select { background-color: #fff; cursor: pointer; min-width: 80px; }
+        
+        button { cursor: pointer; border: none; font-weight: 500; transition: 0.2s; }
+        .btn-clear { background: #fee2e2; color: #991b1b; width: 100%; margin-bottom: 20px; }
+        .btn-clear:hover { background: #fecaca; }
+        
+        .history-box { background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .history-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .history-box h4 { margin: 0; font-size: 0.95rem; }
+        .btn-clear-hist { background: #e2e8f0; color: #475569; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-clear-hist:hover { background: #cbd5e1; }
+        
+        ul { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #64748b; }
+        li { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; display: flex; align-items: center; }
+        li::before { content: "•"; color: #4ade80; font-size: 1.2rem; margin-right: 8px; }
+        li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>แปลงสกุลเงิน</h2>
+    
+    <p id="update-time" class="time-text"></p>
+    <div id="current-rate" class="rate-display">กำลังโหลดข้อมูล...</div>
+
+    <div class="input-group">
+        <input type="number" id="amount-one" placeholder="จำนวนเงินต้นทาง" />
+        <select id="currency-one">
+            <option value="THB">ไทย (THB)</option>
+            <option value="USD" selected>อเมริกา (USD)</option>
+            <option value="CNY">จีน (CNY)</option>
+            <option value="JPY">ญี่ปุ่น (JPY)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <input type="number" id="amount-two" placeholder="ผลลัพธ์การแปลง" readonly />
+        <select id="currency-two">
+            <option value="THB" selected>ไทย (THB)</option>
+            <option value="USD">อเมริกา (USD)</option>
+            <option value="CNY">จีน (CNY)</option>
+            <option value="JPY">ญี่ปุ่น (JPY)</option>
+        </select>
+    </div>
+
+    <button id="btn-clear-all" class="btn-clear">ล้างข้อมูล</button>
+
+    <div class="history-box">
+        <div class="history-box-header">
+            <h4>ประวัติ (10 ล่าสุด)</h4>
+            <button id="btn-clear-hist" class="btn-clear-hist">ล้างประวัติ</button>
+        </div>
+        <ul id="history-list"></ul>
+    </div>
+</div>
+
+<script>
+    const el = (id) => document.getElementById(id);
+    const amountOne = el('amount-one');
+    const amountTwo = el('amount-two');
+    const currencyOne = el('currency-one');
+    const currencyTwo = el('currency-two');
+    const timeText = el('update-time');
+    const currentRateText = el('current-rate');
+    const historyList = el('history-list');
+    
+    const ratesToTHB = {
+        THB: 1,       
+        USD: 34.50,   
+        CNY: 4.85,    
+        JPY: 0.24     
+    };
+    
+    let history = [];
+
+    const updateTime = () => {
+        timeText.textContent = `อัปเดตล่าสุด: ${new Date().toLocaleString('th-TH')}`;
+    };
+
+    const updateRateDisplay = () => {
+        const c1 = currencyOne.value;
+        const c2 = currencyTwo.value;
+        const rate = ratesToTHB[c1] / ratesToTHB[c2];
+        currentRateText.textContent = `1 ${c1} = ${rate.toFixed(4)} ${c2}`;
+    };
+
+    const calculate = () => {
+        const c1 = currencyOne.value;
+        const c2 = currencyTwo.value;
+        const exchangeRate = ratesToTHB[c1] / ratesToTHB[c2];
+
+        const val1 = parseFloat(amountOne.value);
+        amountTwo.value = isNaN(val1) ? '' : (val1 * exchangeRate).toFixed(2);
+    };
+
+    amountOne.addEventListener('input', calculate);
+
+    currencyOne.addEventListener('change', () => {
+        updateRateDisplay();
+        calculate();
+    });
+    currencyTwo.addEventListener('change', () => {
+        updateRateDisplay();
+        calculate();
+    });
+
+    const saveHistory = () => {
+        if (!amountOne.value || !amountTwo.value) return;
+        
+        // บันทึกประวัติ
+        const record = `${amountOne.value} ${currencyOne.value} → ${amountTwo.value} ${currencyTwo.value}`;
+        history = [record, ...history].slice(0, 10);
+        historyList.innerHTML = history.map(item => `<li>${item}</li>`).join('');
+
+        // เคลียร์ค่าในช่อง Input เพื่อให้พร้อมกรอกใหม่ทันที
+        amountOne.value = '';
+        amountTwo.value = '';
+    };
+
+    // เหตุการณ์ change จะทำงานเมื่อพิมพ์เสร็จและกด Enter หรือคลิกออกนอกช่อง
+    amountOne.addEventListener('change', saveHistory);
+
+    el('btn-clear-hist').addEventListener('click', () => {
+        history = [];
+        historyList.innerHTML = '';
+    });
+
+    el('btn-clear-all').addEventListener('click', () => {
+        amountOne.value = '';
+        amountTwo.value = '';
+        updateTime();
+    });
+
+    updateTime();
+    updateRateDisplay();
+</script>
+
+</body>
+</html>
