@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกรายรับ-รายจ่าย</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>ระบบบันทึกรายรับ-รายจ่าย</h1>
+            <p>Financial Tracker</p>
+        </header>
+
+        <!-- สรุปรายงานการเงิน -->
+        <section class="summary-cards">
+            <div class="card income">
+                <span class="card-title">รายรับรวม</span>
+                <div class="card-amount">฿<span id="totalIncome">0.0</span></div>
+            </div>
+            <div class="card expense">
+                <span class="card-title">รายจ่ายรวม</span>
+                <div class="card-amount">฿<span id="totalExpense">0.0</span></div>
+            </div>
+            <div class="card balance">
+                <span class="card-title">คงเหลือสุทธิ</span>
+                <div class="card-amount">฿<span id="netBalance">0.0</span></div>
+            </div>
+        </section>
+
+        <!-- ฟอร์มบันทึกรายการ -->
+        <form id="transactionForm" class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title">ชื่อรายการ</label>
+                    <input type="text" id="title" placeholder="กรอกชื่อรายการ" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="amount" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="type">ประเภท</label>
+                    <select id="type">
+                        <option value="income">รายรับ</option>
+                        <option value="expense">รายจ่าย</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">หมวดหมู่</label>
+                    <select id="category">
+                        <option value="อาหาร">อาหาร</option>
+                        <option value="เดินทาง">เดินทาง</option>
+                        <option value="ช้อปปิ้ง">ช้อปปิ้ง</option>
+                        <option value="เงินเดือน">เงินเดือน</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">บันทึกรายการ</button>
+        </form>
+
+        <!-- ช่องค้นหา Real-time -->
+        <section class="search-section">
+            <input type="text" id="searchInput" placeholder="ค้นหารายการตามชื่อ...">
+        </section>
+
+        <!-- แสดงประวัติรายการ -->
+        <section class="history-section">
+            <h2>ประวัติรายการ</h2>
+            <ul id="transactionList" class="transaction-list">
+                <!-- แสดงผลด้วย JS -->
+            </ul>
+        </section>
+
+        <!-- ปุ่มล้างข้อมูล -->
+        <div class="action-footer">
+            <button id="clearBtn" class="btn btn-danger" type="button">ล้างข้อมูลทั้งหมด</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
